@@ -1,115 +1,52 @@
-###########################################################################################################
-#
-# How to build:
-#
-# docker build -t arkcase/artifacts:latest .
-#
-###########################################################################################################
+# Use an official Tomcat base image with Java 11
+FROM tomcat:9.0.65-jdk11-openjdk
 
-#
-# Basic Definitions
-#
-ARG EXT="core"
-ARG VER="2023.02.03"
+# Maintainer information
+LABEL maintainer="kemboielvis@genius.ke"
 
-#
-# Basic Parameters
-#
-ARG PUBLIC_REGISTRY="public.ecr.aws"
-ARG BASE_REPO="arkcase/artifacts"
-ARG BASE_VER="1.4.2"
-ARG BASE_IMG="${PUBLIC_REGISTRY}/${BASE_REPO}:${BASE_VER}"
+# Set environment variables
 
-#
-# The repo from which to pull everything
-#
-ARG ARKCASE_MVN_REPO="https://nexus.armedia.com/repository/arkcase/"
+ENV JAVA_OPTS="-Djava.net.preferIPv4Stack=true -Duser.timezone=GMT \
+  -Djavax.net.ssl.keyStorePassword=password \
+  -Djavax.net.ssl.trustStorePassword=password \
+  -Djavax.net.ssl.keyStore=/root/.arkcase/acm/private/arkcase.ks \
+  -Djavax.net.ssl.trustStore=/root/.arkcase/acm/private/arkcase.ts \
+  -Dspring.profiles.active=ldap \
+  -Dacm.configurationserver.propertyfile=/root/.arkcase/acm/conf.yml \
+  -Djava.security.egd=file:/dev/./urandom \
+  -Djava.util.logging.config.file=/root/.arkcase/acm/log4j2.xml \
+    -Dconfiguration.client.spring.path=/root/.arkcase/acm/acm-config-server-repo/spring/auditPatterns.properties \
+    -Dspring.datasource.url=jdbc:mysql://mariadb-db:3306/arkcase_db \
+    -Dspring.datasource.username=root \
+    -Dspring.datasource.password=mysecretpassword \
+  -Xms1024M -Xmx1024M"
 
-#
-# ArkCase WAR and CONF files
-#
-ARG ARKCASE_SRC="com.armedia.acm.acm-standard-applications:arkcase:${VER}:war"
+#ENV CATALINA_OPTS="/usr/local/opt/tomcat-native/lib"
+# Install dependencies
+RUN apt-get update && apt-get install -y \
+    postgresql-client \
+    curl \
+    git \
+    && rm -rf /var/lib/apt/lists/*
 
-ARG CONF_VER="${VER}"
-ARG CONF_SRC="com.armedia.arkcase:arkcase-config-${EXT}:${CONF_VER}:zip"
+# Clone the configuration repository
+RUN git clone https://github.com/ArkCase/.arkcase /root/.arkcase
 
-#
-# The PDFNet library and binaries
-#
-ARG PDFTRON_VER="9.3.0"
-ARG PDFTRON_SRC="com.armedia.arkcase:arkcase-pdftron-bin:${PDFTRON_VER}:jar"
+# Download Config Server JAR
+RUN curl -L -o /usr/local/tomcat/config-server.jar https://github.com/ArkCase/acm-config-server/releases/download/2021.03/config-server-2021.03.jar
 
-FROM "${BASE_IMG}"
+# Copy ArkCase WAR file and configurations
+COPY config/arkcase-2021.03.01.war /usr/local/tomcat/webapps/arkcase.war
+COPY config/arkcase.yaml /root/.arkcase/acm/acm-config-server-repo/arkcase.yaml
+# Modify server.xml for SSL and APR configuration
+RUN sed -i 's|<Listener className="org.apache.catalina.core.AprLifecycleListener" SSLEngine="on"/>|<Listener className="org.apache.catalina.core.AprLifecycleListener" SSLEngine="on" useAprConnector="true"/>|' /usr/local/tomcat/conf/server.xml
 
-ARG VER
-ENV VER="${VER}"
+# Add SSL Connector configuration to server.xml
+RUN sed -i '/<\/Service>/i \<Connector port="8843" maxThreads="150" SSLEnabled="true" secure="true" scheme="https" maxHttpHeaderSize="32768" connectionTimeout="40000" useBodyEncodingForURI="true" address="0.0.0.0"> <UpgradeProtocol className="org.apache.coyote.http2.Http2Protocol" /> <SSLHostConfig protocols="TLSv1.2" certificateVerification="none"> <Certificate certificateFile="/root/.arkcase/acm/private/acm-arkcase.crt" certificateKeyFile="/root/.arkcase/acm/private/acm-arkcase.rsa.pem" certificateChainFile="/root/.arkcase/acm/private/arkcase-ca.crt" type="RSA" /> </SSLHostConfig> </Connector>' /usr/local/tomcat/conf/server.xml
 
-#
-# Basic Parameters
-#
 
-LABEL ORG="ArkCase LLC" \
-      MAINTAINER="Armedia Devops Team <devops@armedia.com>" \
-      APP="ArkCase Deployer" \
-      VERSION="${VER}"
+# Expose the default port for Tomcat
+EXPOSE 9999
 
-ENV ARKCASE_DIR="${FILE_DIR}/arkcase"
-ENV ARKCASE_CONF_DIR="${ARKCASE_DIR}/conf"
-ENV ARKCASE_EXTS_DIR="${ARKCASE_DIR}/exts"
-ENV ARKCASE_WARS_DIR="${ARKCASE_DIR}/wars"
-
-ENV PENTAHO_DIR="${FILE_DIR}/pentaho"
-ENV PENTAHO_ANALYTICAL_DIR="${PENTAHO_DIR}/analytical"
-ENV PENTAHO_REPORTS_DIR="${PENTAHO_DIR}/reports"
-
-#
-# Make sure the base tree is created properly
-#
-RUN for n in \
-        "${ARKCASE_DIR}" \
-        "${ARKCASE_CONF_DIR}" \
-        "${ARKCASE_WARS_DIR}" \
-        "${ARKCASE_EXTS_DIR}" \
-        "${PENTAHO_DIR}" \
-        "${PENTAHO_ANALYTICAL_DIR}" \
-        "${PENTAHO_REPORTS_DIR}" \
-    ; do mkdir -p "${n}" ; done
-
-#
-# TODO: Eventually add the Solr and Alfresco trees in here
-#
-
-#
-# Maven auth details
-#
-ARG MVN_GET_ENCRYPTION_KEY
-ARG MVN_GET_USERNAME
-ARG MVN_GET_PASSWORD
-
-#
-# Import the repo
-#
-ARG ARKCASE_MVN_REPO
-
-#
-# Pull all the artifacts
-#
-# The artifacts are pulled in this specific order to facilitate
-# developers' lives when building the containers locally for testing,
-# such that they can leverage layer caching as much as possible
-#
-
-# First PDFTron, since this is the artifact least likely to change
-ARG PDFTRON_SRC
-ENV PDFTRON_TGT="${ARKCASE_CONF_DIR}/00-pdftron.zip"
-RUN mvn-get "${PDFTRON_SRC}" "${ARKCASE_MVN_REPO}" "${PDFTRON_TGT}"
-
-# Then the ArkCase config, since that's the 2nd least likely to change
-ARG CONF_SRC
-ENV CONF_TGT="${ARKCASE_CONF_DIR}/00-conf.zip"
-RUN mvn-get "${CONF_SRC}"    "${ARKCASE_MVN_REPO}" "${CONF_TGT}"
-
-# Finally, ArkCase, since it's the likeliest to change
-ARG ARKCASE_SRC
-ENV ARKCASE_TGT="${ARKCASE_WARS_DIR}/arkcase.war"
-RUN mvn-get "${ARKCASE_SRC}" "${ARKCASE_MVN_REPO}" "${ARKCASE_TGT}"
+# Start the Config Server and Tomcat
+CMD java -jar /usr/local/tomcat/config-server.jar & catalina.sh run
