@@ -17,7 +17,9 @@ ENV JAVA_OPTS="-Djava.net.preferIPv4Stack=true -Duser.timezone=GMT \
     -Dconfiguration.client.spring.path=/root/.arkcase/acm/acm-config-server-repo/spring/auditPatterns.properties \
   -Xms1024M -Xmx1024M"
 
-
+ENV APP_NAME="arkcase"
+ENV APP_URL="http://localhost"
+ENV APP_DOMAIN="localhost"
 
 #ENV CATALINA_OPTS="/usr/local/opt/tomcat-native/lib"
 # Install dependencies
@@ -43,7 +45,9 @@ COPY config/arkcase-2021.03.01.war /usr/local/tomcat/webapps/arkcase.war
 COPY config/arkcase.yaml /root/.arkcase/acm/acm-config-server-repo/arkcase.yaml
 COPY config/properties/quartz.properties /root/.arkcase/acm/acm-config-server-repo/spring/quartz.properties
 COPY config/properties/wopiPlugin.properties /root/.arkcase/acm/acm-config-server-repo/wopiPlugin.properties
-COPY config/properties/datasource.properties /root/.arkcase/acm/acm-config-server-repo/datasource.properties
+#COPY config/properties/datasource.properties /root/.arkcase/acm/acm-config-server-repo/datasource.properties
+COPY config/properties/acmEmailSender.properties /root/.arkcase/acm/acm-config-server-repo/acmEmailSender.properties
+COPY config/properties/arkcase-activemq.properties /root/.arkcase/acm/acm-config-server-repo/arkcase-activemq.properties
 # Modify server.xml for SSL and APR configuration
 RUN sed -i 's|<Listener className="org.apache.catalina.core.AprLifecycleListener" SSLEngine="on"/>|<Listener className="org.apache.catalina.core.AprLifecycleListener" SSLEngine="on" useAprConnector="true"/>|' /usr/local/tomcat/conf/server.xml
 
@@ -53,10 +57,15 @@ RUN sed -i '/<\/Service>/i \<Connector port="8843" maxThreads="150" SSLEnabled="
 # RUN the converter.sh
 COPY config/converter.sh /usr/local/tomcat/converter.sh
 RUN chmod +x /usr/local/tomcat/converter.sh
-RUN /usr/local/tomcat/converter.sh
+
+CMD /usr/local/tomcat/converter.sh
 
 # Expose the default port for Tomcat
-EXPOSE 9999
+EXPOSE 8080
+EXPOSE 443
+EXPOSE 8983
+EXPOSE 61613
+EXPOSE 61616
 
 # Start the Config Server and Tomcat
 CMD java -jar /usr/local/tomcat/config-server.jar & catalina.sh run
