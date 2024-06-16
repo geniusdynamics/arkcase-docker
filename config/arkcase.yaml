@@ -918,17 +918,17 @@ acmPluginConfigurationPrivileges:
       - "/api/{version}/service/object-title-config"
 elk:
   server:
-    url: "http://acm-arkcase/arkcase/acm-elastic"
+    url: "http://${APP_DOMAIN}/arkcase/acm-elastic"
     port: 5601
-    internal.url: "http://acm-arkcase/arkcase/acm-elastic"
+    internal.url: "http://${APP_DOMAIN}/arkcase/acm-elastic"
     internal.port: 5601
     user:
     password:
   dashboard.url: "/app/kibana#/dashboard/693034a0-6ca5-11e7-8049-858c370356cc"
 slk.server:
-  internal.url: "https://acm-arkcase"
+  internal.url: "${APP_URL}"
   internal.port: 8983
-  external.url: "https://acm-arkcase/arkcase"
+  external.url: "${APP_URL}/arkcase"
   dashboard.url: "/solr/banana/src/index.html"
   dashboardfile.url: "#/dashboard/file/"
 ################### External Integration (acmExternalIntegration.properties) ####################
@@ -938,14 +938,14 @@ external.integration:
 ################### Plain Forms Configuraion (acm-forms-plain.properties) ####################
 # Frevvo server informatoin
 frevvo:
-  service.baseUrl: "https://acm-arkcase/arkcase"
-  service.external.baseUrl: "https://acm-arkcase/arkcase"
-  browser.redirect.baseUrl: "https://acm-arkcase/arkcase"
+  service.baseUrl: "${APP_URL}/arkcase"
+  service.external.baseUrl: "${APP_URL}/arkcase"
+  browser.redirect.baseUrl: "${APP_URL}/arkcase"
   protocol.internal: "https"
-  host.internal: "acm-arkcase"
+  host.internal: "${APP_DOMAIN}"
   port.internal: 443
   protocol: "https"
-  host: "acm-arkcase"
+  host: "${APP_DOMAIN}"
   port: "443"
   uri: "/arkcase/frevvo/web/tn/{tenant}/user/{user}/app/{application}/formtype/{type}/{mode}?container=false&resize=true&_formTz={frevvo_timezone}&locale={frevvo_locale}&_data=(acm_ticket:'{acm_ticket}',
   serviceBaseUrl:'{frevvo_service_baseUrl}',serviceExternalBaseUrl:'{frevvo_service_external_baseUrl}',redirectBaseUrl:'{frevvo_browser_redirect_baseUrl}')"
@@ -1108,10 +1108,10 @@ acm.object.changed.notification.filter.include:
 ################### AcmReports Server Configuration (acm-reports-server-config.properties) ####################
 report:
   plugin:
-    PENTAHO_SERVER_URL: "https://acm-arkcase"
+    PENTAHO_SERVER_URL: "${APP_URL}"
     PENTAHO_DESIGNER_CONTEXT: "/arkcase/pentaho/Home"
     PENTAHO_SERVER_PORT: 443
-    PENTAHO_SERVER_INTERNAL_URL: "https://acm-arkcase"
+    PENTAHO_SERVER_INTERNAL_URL: "${APP_URL}"
     PENTAHO_SERVER_INTERNAL_PORT: 443
     PENTAHO_SERVER_USER: "arkcase-admin"
     PENTAHO_SERVER_PASSWORD: "ENC(U2FsdGVkX18opRRmCattSZiUNjfr598Qq7P3DgZSwGw=)"
@@ -1178,11 +1178,11 @@ activiti:
 ################### Alfresco Ldap Syncer Service Configuration (alfrescoLdapSyncerService.properties) ####################
 alfresco:
   admin:
-    baseurl: "https://acm-arkcase/alfresco/s/enterprise/admin/admin-sync"
+    baseurl: "${APP_URL}/alfresco/s/enterprise/admin/admin-sync"
     username: "admin"
     password: "ENC(U2FsdGVkX1/xhPRpzw95iNfLBLwieucwbQ0eg9woLOk=)"
   sync:
-    host: "acm-arkcase"
+    host: "${APP_DOMAIN}"
     port: "443"
     protocol: "https"
     contextRoot: "alfresco"
@@ -1191,7 +1191,7 @@ alfresco:
     enabled: false
     ace.enabled: false
 ################### Alfresco RMA Plugin Configuration (alfrescoRmaPlugin.properties) ####################
-alfresco_host: "acm-arkcase"
+alfresco_host: "${APP_DOMAIN}"
 #alfresco_port: 8080
 alfresco_port: 443
 alfresco_user: "admin"
@@ -1894,7 +1894,7 @@ application:
     idleConfirm: 15000
     displayUserName: "userName"
     historyDays: 30
-    baseUrl: "https://acm-arkcase/arkcase"
+    baseUrl: "${APP_URL}/arkcase"
     basePortalUrl:
     listFilesInFolder:
     applicationName: "arkcase"
@@ -2071,18 +2071,18 @@ capture:
   #file extensions that are allowed to be captured
   fileExtensions: "xml"
   #capture root folder to watch for files added
-  rootFolderToWatch: "${user.home}/.arkcase/capture"
-  working.folder: "${user.home}/.arkcase/working"
-  completed.folder: "${user.home}/.arkcase/completed"
+  rootFolderToWatch: "/root/.arkcase/capture"
+  working.folder: "/root/.arkcase/working"
+  completed.folder: "/root/.arkcase/completed"
   #folder where files which are not able to be processed are saved here
-  error.folder: "${user.home}/.arkcase/error"
+  error.folder: "/root/.arkcase/error"
   #list all object types which are supported
   attachments.supported-object-types: "case_file,complaint"
   #Shared folder where files to be converted to PDF will be copied
   sendForPdfConversionFolder:
-  #sendForPdfConversionFolder: "${user.home}/.arkcase/sendForPdfConversion"
+  #sendForPdfConversionFolder: "/root/.arkcase/sendForPdfConversion"
   #files which are processed by ephesoft and ready to be uploaded back to arkcase
-  convertedPdfsFolder: "${user.home}/.arkcase/processed"
+  convertedPdfsFolder: "/root/.arkcase/processed"
   #Ecm File types and file formats which will be sent for external conversion to PDF
   fileTypesToBeConvertedToPDF: "authorization,abstract"
   fileFormatsToBeConvertedToPDF: "TIF, TIFF, BMP, JPEG, JPG, PNG, HTML, HTM, XLS, XLSX, PPT, PPTX, DOC, DOCX, TXT"
@@ -2306,7 +2306,7 @@ jpa.model.packages: "com.armedia.**"
 acm:
 #  driverClassName: "org.mariadb.jdbc.Driver"
   driverClassName: "org.postgresql.Driver"
-#  &useUnicode=true&characterEncoding=UTF-8&useSsl=true&requireSsl=true&enabledSslProtocolSuites=TLSv1.2&trustCertificateKeyStoreUrl=file:${user.home}/.arkcase/acm/private/arkcase.ts&trustCertificateKeyStorePassword=password
+#  &useUnicode=true&characterEncoding=UTF-8&useSsl=true&requireSsl=true&enabledSslProtocolSuites=TLSv1.2&trustCertificateKeyStoreUrl=file:/root/.arkcase/acm/private/arkcase.ts&trustCertificateKeyStorePassword=password
 #  url: "jdbc:mysql://mariadb-db:3306/arkcase_db?autoReconnect=true"
   url: "jdbc:postgresql://postgres-db:5432/arkcase_db?ssl=false"
   schema: "arkcase"
@@ -2427,9 +2427,9 @@ ecm:
   documentSizeBytesLimit: 52428800
   viewer: "snowbound"
   viewer.js: "$[context]/resources/vendors/ViewerJS/index.html?type=$[type]&title=$[title]#$[context]/api/latest/plugin/ecm/stream/$[fileId]"
-  viewer.snowbound: "https://acm-arkcase/arkcase/VirtualViewerJavaHTML5/index.html?documentId=ecmFileId=$[fileId]%26acm_ticket=$[ticket]%26userid=$[userid]"
+  viewer.snowbound: "${APP_URL}/arkcase/VirtualViewerJavaHTML5/index.html?documentId=ecmFileId=$[fileId]%26acm_ticket=$[ticket]%26userid=$[userid]"
   viewer.snowbound.readonly:
-    url: "https://acm-arkcase/arkcase/VirtualViewerJavaHTML5/index-read-only.html?documentId=ecmFileId=$[fileId]%26acm_ticket=$[ticket]%26userid=$[userid]"
+    url: "${APP_URL}/arkcase/VirtualViewerJavaHTML5/index-read-only.html?documentId=ecmFileId=$[fileId]%26acm_ticket=$[ticket]%26userid=$[userid]"
     initialState: true
   # Snowbound tab header values (fileName | fileType | fileTypeCapitalized)
   # Leave as it is for Core, uncomment for extension
@@ -2496,8 +2496,8 @@ outlook.exchange.integration:
 ################### Notification Plugin Configuration (notification.properties) ####################
 notification:
   arkcase.port:
-  arkcase.url: "https://acm-arkcase"
-  arkcase.url.base: "https://acm-arkcase/arkcase"
+  arkcase.url: "${APP_URL}"
+  arkcase.url.base: "${APP_URL}/arkcase"
   CASE_FILE.label: "Case File"
   CONSULTATION.label: "Consultation"
   COMPLAINT.label: "Complaint"
@@ -2514,7 +2514,7 @@ notification:
     run: true
     size: 50
   #notification email template
-  email.template.path: "${user.home}/.arkcase/acm/templates/ArkCaseEmailTemplate.html"
+  email.template.path: "/root/.arkcase/acm/templates/ArkCaseEmailTemplate.html"
   search:
     filters: "[{\"key\":\"Object Type\", \"values\":\"['NOTIFICATION']\"} ,{\"key\":\"Owner\", \"values\":\"['$user']\"}]"
     name: "notification"
@@ -2543,7 +2543,7 @@ onlyoffice.plugin:
   #url for document server
   files.docservice.url.api: "https://onlyoffice.arkcase.com/ds-vpath/web-apps/apps/api/documents/api.js"
   #base url used for sending to onlyoffice to be able to perform callbacks
-  arkcase.baseurl: "https://acm-arkcase/arkcase"
+  arkcase.baseurl: "${APP_URL}/arkcase"
   config:
     #view configuration
     view:
@@ -2651,7 +2651,7 @@ sessionControl:
   exceptionIfMaximumExceeded: false
 ################### Solr Configuration (solr.properties) ###################
 solr:
-  host: "acm-arkcase"
+  host: "${APP_DOMAIN}"
   port: 443
   contextRoot: "solr"
   clientType: "HTTP"
@@ -2851,7 +2851,7 @@ upcoming:
   password.notification:
     subject: "Reset password"
     body.template: "Your username is %s and you can change your password by clicking this <a href='%s'>link</a> and following the on screen instructions."
-    template.path: "${user.home}/.arkcase/acm/templates/ArkCaseEmailTemplate.html"
+    template.path: "/root/.arkcase/acm/templates/ArkCaseEmailTemplate.html"
     resetPasswordLink: "%s/reset-password?token=%s"
   forgotUsername.notification:
     subject: "Forgot Username"
@@ -2865,12 +2865,12 @@ acm.websockets:
   stomp_broker_relay.relay_protocol: "ssl"
   #Required values for ssl relay protocol only
   #keystore type must be JKS
-  stomp_broker_relay.keystore: "${user.home}/.arkcase/acm/private/arkcase.ks"
+  stomp_broker_relay.keystore: "/root/.arkcase/acm/private/arkcase.ks"
   stomp_broker_relay.keystore_pass: "AcMd3v$"
-  stomp_broker_relay.truststore: "${user.home}/.arkcase/acm/private/arkcase.ts"
+  stomp_broker_relay.truststore: "/root/.arkcase/acm/private/arkcase.ts"
   stomp_broker_relay.truststore_pass: "password"
   stomp_broker_relay.truststore_type: "JKS"
-  stomp_broker_relay.relay_host: "acm-arkcase"
+  stomp_broker_relay.relay_host: "${APP_DOMAIN}"
   stomp_broker_relay.relay_port: 61613
   stomp_broker_relay.heartbeat_send_interval: 20000
   stomp_broker_relay.heartbeat_receive_interval: 20000
@@ -2889,7 +2889,7 @@ wopi.plugin:
       url: "https://wopi.arkcase.com/wopi/office/%1$d/view?access_token=%2$s&protocol=%3$s&domain=%4$s&port=%5$d&context=%6$s&access_token_param_name=%7$s&file_id_param_name=%8$s&app_type=WopiTest"
   tenant:
     protocol: "https"
-    domain: "acm-arkcase"
+    domain: "${APP_DOMAIN}"
     port: 443
     context: "arkcase"
     accessTokenParamName: "acm_wopi_ticket"
@@ -2992,7 +2992,7 @@ language.settings:
   defaultLocale: en
   localeCode: en
 
-camel.workingDirectory: "${user.home}/.arkcase/acm/cmis/"
+camel.workingDirectory: "/root/.arkcase/acm/cmis/"
 
 ### Password configuration ###
 password:
