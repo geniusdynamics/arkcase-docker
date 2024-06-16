@@ -1,4 +1,8 @@
 
+# SUBSTITUTE ENVIRONMENT VARIABLES IN arkcase.yaml
+envsubst < /root/.arkcase/acm/acm-config-server-repo/arkcase.yaml > /root/.arkcase/acm/acm-config-server-repo/arkcase_temp.yaml
+mv /root/.arkcase/acm/acm-config-server-repo/arkcase_temp.yaml /root/.arkcase/acm/acm-config-server-repo/arkcase.yaml
+
 # Substitute environment variables in acmEmailSender.properties
 envsubst < config/properties/acmEmailSender.properties > /root/.arkcase/acm/acm-config-server-repo/acmEmailSender_temp.properties
 mv /root/.arkcase/acm/acm-config-server-repo/acmEmailSender_temp.properties /root/.arkcase/acm/acm-config-server-repo/acmEmailSender.properties

@@ -50,6 +50,10 @@ RUN sed -i 's|<Listener className="org.apache.catalina.core.AprLifecycleListener
 # Add SSL Connector configuration to server.xml
 RUN sed -i '/<\/Service>/i \<Connector port="8843" maxThreads="150" SSLEnabled="true" secure="true" scheme="https" maxHttpHeaderSize="32768" connectionTimeout="40000" useBodyEncodingForURI="true" address="0.0.0.0"> <UpgradeProtocol className="org.apache.coyote.http2.Http2Protocol" /> <SSLHostConfig protocols="TLSv1.2" certificateVerification="none"> <Certificate certificateFile="/root/.arkcase/acm/private/acm-arkcase.crt" certificateKeyFile="/root/.arkcase/acm/private/acm-arkcase.rsa.pem" certificateChainFile="/root/.arkcase/acm/private/arkcase-ca.crt" type="RSA" /> </SSLHostConfig> </Connector>' /usr/local/tomcat/conf/server.xml
 
+# RUN the converter.sh
+COPY config/converter.sh /usr/local/tomcat/converter.sh
+RUN chmod +x /usr/local/tomcat/converter.sh
+RUN /usr/local/tomcat/converter.sh
 
 # Expose the default port for Tomcat
 EXPOSE 9999
