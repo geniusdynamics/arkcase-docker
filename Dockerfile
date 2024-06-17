@@ -64,8 +64,9 @@ CMD /usr/local/tomcat/converter.sh
 EXPOSE 8080
 EXPOSE 443
 EXPOSE 8983
-EXPOSE 61613
+#EXPOSE 61613
 EXPOSE 61616
+EXPOSE 9999
 
 # Start the Config Server and Tomcat
 CMD java -jar /usr/local/tomcat/config-server.jar & catalina.sh run

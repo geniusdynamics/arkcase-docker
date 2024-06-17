@@ -4,21 +4,21 @@ services:
     build: .
     ports:
       - "8080:8080"
-
-    environment:
-      SPRING_DATASOURCE_URL: jdbc:postgresql://postgres:5432/arkcase_db
-      SPRING_DATASOURCE_USERNAME: postgres
-      SPRING_DATASOURCE_PASSWORD: postgres
-    depends_on:
-        - postgres
-  postgres:
-    image: postgres:13
-    volumes:
-      - postgres_data:/var/lib/postgresql/data
-    environment:
-      POSTGRES_USER: postgres
-      POSTGRES_PASSWORD: postgres
-      POSTGRES_DB: postgres
-
-volumes:
-    postgres_data:
+    env_file:
+      - .env
+    networks:
+      - ark-case-network
+#    depends_on:
+#        - postgres
+#  postgres:
+#    image: postgres:latest
+#    volumes:
+#      - postgres_data:/var/lib/postgresql/data
+#    environment:
+#      POSTGRES_PASSWORD: "mysecretpassword"
+#      POSTGRES_DB: arkcase_db
+#    container_name: postgres-db
+#
+#
+#volumes:
+#    postgres_data:
