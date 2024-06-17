@@ -1,6 +1,13 @@
+# ARK CASE DOCKER IMAGE
+This docker file in not complete its still under development
+
 # BUILD DOCKER FILE
 ```shell
 sudo docker build -t ark-case:latest .
+```
+# RUN POSTRES DATABASE
+```shell
+
 ```
 
 # RUN DOCKER COMMANDS

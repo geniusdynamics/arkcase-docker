@@ -4,21 +4,29 @@ services:
     build: .
     ports:
       - "8080:8080"
+      - "9999:9999"
+      - "443:443"
     env_file:
       - .env
     networks:
       - ark-case-network
-#    depends_on:
-#        - postgres
-#  postgres:
-#    image: postgres:latest
-#    volumes:
-#      - postgres_data:/var/lib/postgresql/data
-#    environment:
-#      POSTGRES_PASSWORD: "mysecretpassword"
-#      POSTGRES_DB: arkcase_db
-#    container_name: postgres-db
-#
-#
-#volumes:
-#    postgres_data:
+    depends_on:
+      - postgres
+  postgres:
+    image: postgres:13
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    environment:
+      POSTGRES_PASSWORD: "mysecretpassword"
+      POSTGRES_DB: arkcase_db
+    container_name: postgres-db
+    networks:
+      - ark-case-network
+    ports:
+      - "5432:5432"
+
+volumes:
+  postgres_data:
+
+networks:
+  ark-case-network:
