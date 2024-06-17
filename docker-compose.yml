@@ -17,7 +17,7 @@ services:
     volumes:
       - postgres_data:/var/lib/postgresql/data
     environment:
-      POSTGRES_PASSWORD: "mysecretpassword"
+      POSTGRES_PASSWORD: mysecretpassword
       POSTGRES_DB: arkcase_db
     container_name: postgres-db
     networks:

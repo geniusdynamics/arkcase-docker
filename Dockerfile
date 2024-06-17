@@ -45,7 +45,7 @@ COPY config/arkcase-2021.03.01.war /usr/local/tomcat/webapps/arkcase.war
 COPY config/arkcase.yaml /root/.arkcase/acm/acm-config-server-repo/arkcase.yaml
 COPY config/properties/quartz.properties /root/.arkcase/acm/acm-config-server-repo/spring/quartz.properties
 COPY config/properties/wopiPlugin.properties /root/.arkcase/acm/acm-config-server-repo/wopiPlugin.properties
-#COPY config/properties/datasource.properties /root/.arkcase/acm/acm-config-server-repo/datasource.properties
+COPY config/properties/datasource.properties /root/.arkcase/acm/acm-config-server-repo/datasource.properties
 COPY config/properties/acmEmailSender.properties /root/.arkcase/acm/acm-config-server-repo/acmEmailSender.properties
 COPY config/properties/arkcase-activemq.properties /root/.arkcase/acm/acm-config-server-repo/arkcase-activemq.properties
 # Modify server.xml for SSL and APR configuration

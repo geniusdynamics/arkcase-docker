@@ -14,8 +14,8 @@ envsubst < /root/.arkcase/acm/acm-config-server-repo/wopiPlugin.properties > /ro
 mv /root/.arkcase/acm/acm-config-server-repo/wopiPlugin_temp.properties /root/.arkcase/acm/acm-config-server-repo/wopiPlugin.properties
 
 # Substitute environment variables in datasource.properties
-#envsubst < /root/.arkcase/acm/acm-config-server-repo/datasource.properties > /root/.arkcase/acm/acm-config-server-repo/datasource_temp.properties
-#mv /root/.arkcase/acm/acm-config-server-repo/datasource_temp.properties /root/.arkcase/acm/acm-config-server-repo/datasource.properties
+envsubst < /root/.arkcase/acm/acm-config-server-repo/datasource.properties > /root/.arkcase/acm/acm-config-server-repo/datasource_temp.properties
+mv /root/.arkcase/acm/acm-config-server-repo/datasource_temp.properties /root/.arkcase/acm/acm-config-server-repo/datasource.properties
 # Print environment variables after substitution
 
 # Substitute activeMQ environment variables in arkcase-activemq.properties
