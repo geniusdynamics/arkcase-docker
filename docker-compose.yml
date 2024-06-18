@@ -8,14 +8,18 @@ services:
       - "443:443"
     env_file:
       - .env
+    volumes:
+      - arkcase-private:/root/.arkcase/acm/private
     networks:
       - ark-case-network
     depends_on:
       - postgres
+      - activeMq
+
   postgres:
-    image: postgres:13
-    volumes:
-      - postgres_data:/var/lib/postgresql/data
+    image: postgres:latest
+#    volumes:
+#      - postgres_data:/var/lib/postgresql/data
     environment:
       POSTGRES_PASSWORD: mysecretpassword
       POSTGRES_DB: arkcase_db
@@ -24,9 +28,66 @@ services:
       - ark-case-network
     ports:
       - "5432:5432"
+  solr:
+    image: solr
+    ports:
+      - "8983:8983"
+    volumes:
+      - solr-data:/var/solr
+      - arkcase-private:/opt/solr/private
+    networks:
+        - ark-case-network
+    container_name: solr
+    user: root
+    command: ["solr", "-f", "-force"]
+    environment:
+      - SOLR_HOST=localhost
+      - SOLR_SSL_KEY_STORE=/opt/solr/private/arkcase.ks
+      - SOLR_SSL_KEY_STORE_PASSWORD=password
+      - SOLR_SSL_TRUST_STORE=/opt/solr/private/arkcase.ts
+      - SOLR_SSL_TRUST_STORE_PASSWORD=password
+      - SOLR_SSL_NEED_CLIENT_AUTH=false
+      - SOLR_SSL_WANT_CLIENT_AUTH=false
+    depends_on:
+      - arkcase
+  activeMq:
+    image: rmohr/activemq:5.15.9
+    ports:
+      - "8161:8161"
+      - "61616:61616"
+      - "61613:61613"
+    networks:
+      - ark-case-network
+    container_name: activeMq
+
+#  pentaho:
+#    container_name: pentaho
+#    image: ca0abinary/docker-pentaho
+#    depends_on:
+#      - postgres
+#    ports:
+#      - "8080:8084"
+#    environment:
+#      - HOST=localhost
+#      - USER=pentaho
+#      - PASSWORD=password
+#      - PGUSER=postgres
+#      - PGPASSWORD=postgres
+#      - PGHOST=postgres-db
+#    volumes:
+#      - pentaho-hsqldb-data:/opt/pentaho/server/pentaho-server/data/hsqldb
+#      - pentaho-jackrabbit-data:/opt/pentaho/server/pentaho-server/pentaho-solutions/system/jackrabbit/repository
+#    networks:
+#        - ark-case-network
+
 
 volumes:
-  postgres_data:
+#  postgres_data:
+  solr-data:
+  arkcase-private:
+#  pentaho-hsqldb-data:
+#  pentaho-jackrabbit-data:
+#  pentaho-pg-data:
 
 networks:
   ark-case-network:

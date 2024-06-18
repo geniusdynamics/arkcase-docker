@@ -61,6 +61,9 @@ RUN sed -i '/<\/Service>/i \<Connector port="8843" maxThreads="150" SSLEnabled="
 COPY config/converter.sh /usr/local/tomcat/converter.sh
 RUN chmod +x /usr/local/tomcat/converter.sh
 
+RUN chmod 755 /root/.arkcase/acm/private/*
+RUN chmod 777 /root/.arkcase/acm/private/*
+
 CMD /usr/local/tomcat/converter.sh
 
 # Expose the default port for Tomcat

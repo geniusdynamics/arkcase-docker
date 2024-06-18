@@ -2871,7 +2871,7 @@ acm.websockets:
   stomp_broker_relay.truststore_pass: "password"
   stomp_broker_relay.truststore_type: "JKS"
   stomp_broker_relay.relay_host: "${APP_DOMAIN}"
-  stomp_broker_relay.relay_port: 61616
+  stomp_broker_relay.relay_port: 61613
   stomp_broker_relay.heartbeat_send_interval: 20000
   stomp_broker_relay.heartbeat_receive_interval: 20000
   #STOMP (Browser to ActiveMQ) authentication
@@ -2944,7 +2944,7 @@ acm.hazelcast:
   ## Management Center configuration ##
   management_center:
     enabled: true
-    url: http://arkcase-host:8880/hazelcast-mancenter
+    url: https://${APP_DOMAIN}:8880/hazelcast-mancenter
     update_interval: 3
 
   ## Network configuration ##
