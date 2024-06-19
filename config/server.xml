@@ -27,8 +27,8 @@
                    SSLVerifyClient="optional" SSLProtocol="TLSv1.2"
                    SSLHonorCipherOrder="true"
                    ciphers="TLS_RSA_WITH_AES_128_CBC_SHA,TLS_RSA_WITH_AES_256_CBC_SHA"
-                   keystoreFile="/root/.arkcase/acm/private/arkcase.ks"
-                   keystorePass="password" />
+                   keystoreFile="$KEYSTORE_PATH"
+                   keystorePass="$KEY_STORE_PASSWORD" />
 
         <Engine name="Catalina" defaultHost="localhost">
 

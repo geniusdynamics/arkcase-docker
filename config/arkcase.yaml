@@ -2306,7 +2306,7 @@ jpa.model.packages: "com.armedia.**"
 acm:
 #  driverClassName: "org.mariadb.jdbc.Driver"
   driverClassName: "org.postgresql.Driver"
-#  &useUnicode=true&characterEncoding=UTF-8&useSsl=true&requireSsl=true&enabledSslProtocolSuites=TLSv1.2&trustCertificateKeyStoreUrl=file:/root/.arkcase/acm/private/arkcase.ts&trustCertificateKeyStorePassword=password
+#  &useUnicode=true&characterEncoding=UTF-8&useSsl=true&requireSsl=true&enabledSslProtocolSuites=TLSv1.2&trustCertificateKeyStoreUrl=file:$TRUSTSTORE_PATH&trustCertificateKeyStorePassword=password
 #  url: "jdbc:mysql://mariadb-db:3306/arkcase_db?autoReconnect=true"
   url: "jdbc:postgresql://postgres-db:5432/arkcase_db?ssl=false"
   schema: "arkcase"
@@ -2865,10 +2865,10 @@ acm.websockets:
   stomp_broker_relay.relay_protocol: "ssl"
   #Required values for ssl relay protocol only
   #keystore type must be JKS
-  stomp_broker_relay.keystore: "/root/.arkcase/acm/private/arkcase.ks"
-  stomp_broker_relay.keystore_pass: "password"
-  stomp_broker_relay.truststore: "/root/.arkcase/acm/private/arkcase.ts"
-  stomp_broker_relay.truststore_pass: "password"
+  stomp_broker_relay.keystore: "$KEYSTORE_PATH"
+  stomp_broker_relay.keystore_pass: "$KEY_STORE_PASSWORD"
+  stomp_broker_relay.truststore: "$TRUSTSTORE_PATH"
+  stomp_broker_relay.truststore_pass: "$KEY_STORE_PASSWORD"
   stomp_broker_relay.truststore_type: "JKS"
   stomp_broker_relay.relay_host: "${APP_DOMAIN}"
   stomp_broker_relay.relay_port: 61613
