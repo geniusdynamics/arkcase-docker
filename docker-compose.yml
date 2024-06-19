@@ -42,10 +42,10 @@ services:
     command: ["solr", "-f", "-force"]
     environment:
       - SOLR_HOST=localhost
-      - SOLR_SSL_KEY_STORE=/opt/solr/private/arkcase.ks
-      - SOLR_SSL_KEY_STORE_PASSWORD=password
-      - SOLR_SSL_TRUST_STORE=/opt/solr/private/arkcase.ts
-      - SOLR_SSL_TRUST_STORE_PASSWORD=password
+      - SOLR_SSL_KEY_STORE=/opt/solr/private/files/arkcase.ks
+      - SOLR_SSL_KEY_STORE_PASSWORD=arkcase
+      - SOLR_SSL_TRUST_STORE=/opt/solr/private/files/arkcase.ts
+      - SOLR_SSL_TRUST_STORE_PASSWORD=arkcase
       - SOLR_SSL_NEED_CLIENT_AUTH=false
       - SOLR_SSL_WANT_CLIENT_AUTH=false
     depends_on:

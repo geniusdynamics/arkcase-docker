@@ -5,17 +5,17 @@ FROM tomcat:9.0.65-jdk11-openjdk
 LABEL maintainer="kemboielvis@genius.ke"
 
 # Set environment variables
-ENV JAVA_OPTS="-Djava.net.preferIPv4Stack=true -Duser.timezone=GMT \
-  -Djavax.net.ssl.keyStorePassword=password \
-  -Djavax.net.ssl.trustStorePassword=password \
-  -Djavax.net.ssl.keyStore=/root/.arkcase/acm/private/arkcase.ks \
-  -Djavax.net.ssl.trustStore=/root/.arkcase/acm/private/arkcase.ts \
-  -Dspring.profiles.active=ldap \
-  -Dacm.configurationserver.propertyfile=/root/.arkcase/acm/conf.yml \
-  -Djava.security.egd=file:/dev/./urandom \
-  -Djava.util.logging.config.file=/root/.arkcase/acm/log4j2.xml \
-    -Dconfiguration.client.spring.path=/root/.arkcase/acm/acm-config-server-repo/spring/auditPatterns.properties \
-  -Xms1024M -Xmx1024M"
+#ENV JAVA_OPTS="-Djava.net.preferIPv4Stack=true -Duser.timezone=GMT \
+#  -Djavax.net.ssl.keyStorePassword=$KEY_STORE_PASSWORD \
+#  -Djavax.net.ssl.trustStorePassword=$KEY_STORE_PASSWORD \
+#  -Djavax.net.ssl.keyStore=$KEYSTORE_PATH \
+#  -Djavax.net.ssl.trustStore=$TRUSTSTORE_PATH \
+#  -Dspring.profiles.active=ldap \
+#  -Dacm.configurationserver.propertyfile=/root/.arkcase/acm/conf.yml \
+#  -Djava.security.egd=file:/dev/./urandom \
+#  -Djava.util.logging.config.file=/root/.arkcase/acm/log4j2.xml \
+#    -Dconfiguration.client.spring.path=/root/.arkcase/acm/acm-config-server-repo/spring/auditPatterns.properties \
+#  -Xms1024M -Xmx1024M"
 
 ENV APP_NAME="arkcase"
 ENV APP_URL="http://localhost"
@@ -40,11 +40,11 @@ RUN git clone https://github.com/ArkCase/.arkcase /root/.arkcase
 # Download Config Server JAR
 RUN curl -L -o /usr/local/tomcat/config-server.jar https://github.com/ArkCase/acm-config-server/releases/download/2021.03/config-server-2021.03.jar
 # For production
-RUN curl -L -o /usr/local/tomcat/webapps/arkcase.war https://github.com/ArkCase/ArkCase/releases/download/2021.03.01/arkcase-2021.03.01.war
+#RUN curl -L -o /usr/local/tomcat/webapps/arkcase.war https://github.com/ArkCase/ArkCase/releases/download/2021.03.01/arkcase-2021.03.01.war
 
 # Copy ArkCase WAR file and configurations
 # For development
-#COPY config/arkcase-2021.03.01.war /usr/local/tomcat/webapps/arkcase.war
+COPY config/arkcase-2021.03.01.war /usr/local/tomcat/webapps/arkcase.war
 COPY config/arkcase.yaml /root/.arkcase/acm/acm-config-server-repo/arkcase.yaml
 COPY config/properties/quartz.properties /root/.arkcase/acm/acm-config-server-repo/spring/quartz.properties
 COPY config/properties/wopiPlugin.properties /root/.arkcase/acm/acm-config-server-repo/wopiPlugin.properties
@@ -54,25 +54,37 @@ COPY config/properties/arkcase-activemq.properties /root/.arkcase/acm/acm-config
 # Modify server.xml for SSL and APR configuration
 RUN sed -i 's|<Listener className="org.apache.catalina.core.AprLifecycleListener" SSLEngine="on"/>|<Listener className="org.apache.catalina.core.AprLifecycleListener" SSLEngine="on" useAprConnector="true"/>|' /usr/local/tomcat/conf/server.xml
 
-# Add SSL Connector configuration to server.xml
-RUN sed -i '/<\/Service>/i \<Connector port="8843" maxThreads="150" SSLEnabled="true" secure="true" scheme="https" maxHttpHeaderSize="32768" connectionTimeout="40000" useBodyEncodingForURI="true" address="0.0.0.0"> <UpgradeProtocol className="org.apache.coyote.http2.Http2Protocol" /> <SSLHostConfig protocols="TLSv1.2" certificateVerification="none"> <Certificate certificateFile="/root/.arkcase/acm/private/acm-arkcase.crt" certificateKeyFile="/root/.arkcase/acm/private/acm-arkcase.rsa.pem" certificateChainFile="/root/.arkcase/acm/private/arkcase-ca.crt" type="RSA" /> </SSLHostConfig> </Connector>' /usr/local/tomcat/conf/server.xml
-
+# Add combined SSL Connector configuration to server.xml
+RUN sed -i '/<\/Service>/i \<Connector port="8443" protocol="org.apache.coyote.http11.Http11AprProtocol" \
+               maxThreads="150" SSLEnabled="true" secure="true" scheme="https" \
+               maxHttpHeaderSize="32768" connectionTimeout="40000" useBodyEncodingForURI="true" \
+               address="0.0.0.0"> \
+               <UpgradeProtocol className="org.apache.coyote.http2.Http2Protocol" /> \
+               <SSLHostConfig protocols="TLSv1.2" certificateVerification="none"> \
+                 <Certificate certificateFile="$CERT_PATH" \
+                              certificateKeyFile="$KEY_PATH" \
+                              certificateChainFile="$CA_CHAIN_PATH" type="RSA" /> \
+               </SSLHostConfig> \
+               keystoreFile="$KEYSTORE_PATH" \
+               keystorePass="$KEY_STORE_PASSWORD" \
+               SSLCertificateFile="$CERT_PATH" \
+               SSLCertificateKeyFile="$KEY_PATH" \
+               SSLCACertificateFile="$CA_CHAIN_PATH" \
+               SSLVerifyClient="optional" SSLProtocol="TLSv1.2" \
+               SSLHonorCipherOrder="true" \
+               ciphers="TLS_RSA_WITH_AES_128_CBC_SHA,TLS_RSA_WITH_AES_256_CBC_SHA"> \
+     </Connector>' /usr/local/tomcat/conf/server.xml
 # RUN the converter.sh
 COPY config/converter.sh /usr/local/tomcat/converter.sh
 RUN chmod +x /usr/local/tomcat/converter.sh
 
+
 RUN chmod 755 /root/.arkcase/acm/private/*
 RUN chmod 777 /root/.arkcase/acm/private/*
-
-CMD /usr/local/tomcat/converter.sh
-
 # Expose the default port for Tomcat
 EXPOSE 8080
 EXPOSE 443
-EXPOSE 8983
-#EXPOSE 61613
-EXPOSE 61616
 EXPOSE 9999
 
 # Start the Config Server and Tomcat
-CMD java -jar /usr/local/tomcat/config-server.jar & catalina.sh run
+CMD /usr/local/tomcat/converter.sh & java -jar /usr/local/tomcat/config-server.jar & catalina.sh run
