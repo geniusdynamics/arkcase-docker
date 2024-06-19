@@ -44,6 +44,7 @@ touch /root/.arkcase/acm/private/index.txt
 echo 1000 > /root/.arkcase/acm/private/serial
 
 # Create custom OpenSSL configuration file
+# Create custom OpenSSL configuration file
 cat > $CUSTOM_OPENSSL_CONF <<EOL
 [ ca ]
 default_ca = CA_default
@@ -66,6 +67,7 @@ default_md      = sha256
 preserve        = no
 policy          = policy_anything
 email_in_dn     = no
+rand_serial     = yes
 
 [ req ]
 default_bits        = 2048
@@ -100,7 +102,17 @@ organizationName       = optional
 organizationalUnitName = optional
 commonName             = supplied
 emailAddress           = optional
+
+[ server_cert ]
+basicConstraints = CA:FALSE
+nsCertType = server
+nsComment = "OpenSSL Generated Server Certificate"
+subjectKeyIdentifier = hash
+authorityKeyIdentifier = keyid,issuer:always
+keyUsage = critical, digitalSignature, keyEncipherment
+extendedKeyUsage = serverAuth
 EOL
+
 # Ensure correct permissions
 chmod 755 /root/.arkcase/acm/private/
 chmod 777 /root/.arkcase/acm/private/
@@ -123,12 +135,12 @@ openssl req -config "$CUSTOM_OPENSSL_CONF" -key "$CA_KEY_PATH" -new -sha256 -out
 
 # Sign server certificate with CA
 echo "Signing server certificate..."
-openssl ca -config "$CUSTOM_OPENSSL_CONF" -extensions server_cert -days 3650 -notext -md sha256 -in "$CSR_PATH" -out "$CERT_PATH" -passin pass:"$KEY_STORE_PASSWORD" -keyfile "$CA_KEY_PATH" -cert "$CA_CHAIN_PATH" -outdir "/root/.arkcase/acm/private/"
+openssl ca -config "$CUSTOM_OPENSSL_CONF" -extensions server_cert -days 3650 -notext -md sha256 -in "$CSR_PATH" -out "$CERT_PATH" -passin pass:"$KEY_STORE_PASSWORD" -keyfile "$CA_KEY_PATH" -cert "$CA_CHAIN_PATH" -outdir "/root/.arkcase/acm/private/" -batch
 
 # Create keystore
 # Create PKCS12 keystore
 echo "Creating PKCS12 keystore..."
-openssl pkcs12 -export -in "$CERT_PATH" -inkey "$KEY_PATH" -out "$KEYSTORE12_PATH" -name arkcase -CAfile "$CA_CHAIN_PATH" -caname root -chain -passout pass:"$KEY_STORE_PASSWORD" -passin pass:"$KEY_STORE_PASSWORD"
+openssl pkcs12 -export -in "$CERT_PATH" -inkey "$CA_KEY_PATH" -out "$KEYSTORE12_PATH" -name arkcase -CAfile "$CA_CHAIN_PATH" -caname root -chain -passout pass:"$KEY_STORE_PASSWORD" -passin pass:"$KEY_STORE_PASSWORD"
 
 # Convert PKCS12 keystore to JKS keystore
 echo "Converting PKCS12 keystore to JKS..."
