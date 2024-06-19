@@ -190,11 +190,32 @@ mv /root/.arkcase/acm/acm-config-server-repo/datasource_temp.properties /root/.a
 # Substitute activeMQ environment variables in arkcase-activemq.properties
 envsubst < /root/.arkcase/acm/acm-config-server-repo/arkcase-activemq.properties > /root/.arkcase/acm/acm-config-server-repo/arkcase-activemq_temp.properties
 mv /root/.arkcase/acm/acm-config-server-repo/arkcase-activemq_temp.properties /root/.arkcase/acm/acm-config-server-repo/arkcase-activemq.properties
+# Add combined SSL Connector configuration to server.xml
+# shellcheck disable=SC2016
+sed -i '/<\/Service>/i \
+<Connector port="8443" protocol="org.apache.coyote.http11.Http11AprProtocol" \
+           maxThreads="150" SSLEnabled="true" secure="true" scheme="https" \
+           maxHttpHeaderSize="32768" connectionTimeout="40000" useBodyEncodingForURI="true" \
+           address="0.0.0.0"> \
+  <UpgradeProtocol className="org.apache.coyote.http2.Http2Protocol" /> \
+  <SSLHostConfig protocols="TLSv1.2" certificateVerification="none"> \
+    <Certificate certificateFile="'$CERT_PATH'" \
+                 certificateKeyFile="'$KEY_PATH'" \
+                 certificateChainFile="'$CA_CHAIN_PATH'" type="RSA" /> \
+  </SSLHostConfig> \
+  keystoreFile="'$KEYSTORE_PATH'" \
+  keystorePass="'$KEY_STORE_PASSWORD'" \
+  SSLCertificateFile="'$CERT_PATH'" \
+  SSLCertificateKeyFile="'$KEY_PATH'" \
+  SSLCACertificateFile="'$CA_CHAIN_PATH'" \
+  SSLVerifyClient="optional" SSLProtocol="TLSv1.2" \
+  SSLHonorCipherOrder="true" \
+  ciphers="TLS_RSA_WITH_AES_128_CBC_SHA,TLS_RSA_WITH_AES_256_CBC_SHA"> \
+</Connector>' /usr/local/tomcat/conf/server.xml
 
 envsubst < /usr/local/tomcat/conf/server.xml > /usr/local/tomcat/conf/server.xml.tmp
 mv /usr/local/tomcat/conf/server.xml.tmp /usr/local/tomcat/conf/server.xml
 
-echo /usr/local/tomcat/conf/server.xml
 
 echo  "Test if the Key tools are fine"
 keytool -list -keystore "$KEYSTORE_PATH" -storepass "$KEY_STORE_PASSWORD"
