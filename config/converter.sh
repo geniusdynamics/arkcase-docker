@@ -35,8 +35,13 @@ export CA_KEY_PATH="/root/.arkcase/acm/private/ca.key.pem"
 export KEY_STORE_PASSWORD=arkcase
 export CUSTOM_OPENSSL_CONF="/root/.arkcase/acm/private/custom_openssl.cnf"
 
+# Generate a 256-bit (32 bytes) random key
+openssl rand -out secret.key 32
 
-
+# Encrypt the password and encode it in Base64
+ENCRYPTED_PASSWORD=$(echo -n "$KEY_STORE_PASSWORD" | openssl enc -aes-256-cbc -base64 -K "$(od -An -t x1 -v secret.key | tr -d ' \n')" -iv 00000000000000000000000000000000)
+echo "Encrypted password: $ENCRYPTED_PASSWORD"
+export ENCRYPTED_PASSWORD=$ENCRYPTED_PASSWORD
 
 # Create necessary directories and files for OpenSSL CA
 mkdir -p /root/.arkcase/acm/private/newcerts /root/.arkcase/acm/private/certs /root/.arkcase/acm/private/crl
@@ -144,7 +149,7 @@ openssl pkcs12 -export -in "$CERT_PATH" -inkey "$CA_KEY_PATH" -out "$KEYSTORE12_
 
 # Convert PKCS12 keystore to JKS keystore
 echo "Converting PKCS12 keystore to JKS..."
-keytool -importkeystore -srckeystore "$KEYSTORE12_PATH" -srcstoretype PKCS12 -destkeystore "$KEYSTORE_PATH" -deststoretype JKS -storepass "$KEY_STORE_PASSWORD" -srcstorepass "$KEY_STORE_PASSWORD"
+keytool -importkeystore -srckeystore "$KEYSTORE12_PATH" -srcstoretype PKCS12 -destkeystore "$KEYSTORE_PATH" -deststoretype pkcs12 -storepass "$KEY_STORE_PASSWORD" -srcstorepass "$KEY_STORE_PASSWORD"
 
 # Create truststore
 echo "Creating truststore..."
@@ -165,11 +170,11 @@ export JAVA_OPTS="-Djava.net.preferIPv4Stack=true -Duser.timezone=GMT \
   -Dacm.configurationserver.propertyfile=/root/.arkcase/acm/conf.yml \
   -Djava.security.egd=file:/dev/./urandom \
   -Djava.util.logging.config.file=/root/.arkcase/acm/log4j2.xml \
-    -Dconfiguration.client.spring.path=/root/.arkcase/acm/acm-config-server-repo/spring/auditPatterns.properties \
   -Xms1024M -Xmx1024M"
 
+#-Dconfiguration.client.spring.path=/root/.arkcase/acm/acm-config-server-repo/spring/ \
 # Print environment variables before substitution
-env
+#env
 # SUBSTITUTE ENVIRONMENT VARIABLES IN arkcase.yaml
 envsubst < /root/.arkcase/acm/acm-config-server-repo/arkcase.yaml > /root/.arkcase/acm/acm-config-server-repo/arkcase_temp.yaml
 mv /root/.arkcase/acm/acm-config-server-repo/arkcase_temp.yaml /root/.arkcase/acm/acm-config-server-repo/arkcase.yaml
@@ -190,6 +195,14 @@ mv /root/.arkcase/acm/acm-config-server-repo/datasource_temp.properties /root/.a
 # Substitute activeMQ environment variables in arkcase-activemq.properties
 envsubst < /root/.arkcase/acm/acm-config-server-repo/arkcase-activemq.properties > /root/.arkcase/acm/acm-config-server-repo/arkcase-activemq_temp.properties
 mv /root/.arkcase/acm/acm-config-server-repo/arkcase-activemq_temp.properties /root/.arkcase/acm/acm-config-server-repo/arkcase-activemq.properties
+
+env < /root/.arkcase/acm/acm-config-server-repo/arkcase-activemq.yaml > /root/.arkcase/acm/acm-config-server-repo/arkcase-activemq_temp.yaml
+mv /root/.arkcase/acm/acm-config-server-repo/arkcase-activemq_temp.yaml /root/.arkcase/acm/acm-config-server-repo/arkcase-activemq.yaml
+
+# Substitute environment variables in spring-properties-encryption.xml
+envsubst < /root/.arkcase/acm/encryption/spring-properties-encryption.xml > /root/.arkcase/acm/encryption/spring-properties-encryption_temp.xml
+mv /root/.arkcase/acm/encryption/spring-properties-encryption_temp.xml /root/.arkcase/acm/encryption/spring-properties-encryption.xml
+
 # Add combined SSL Connector configuration to server.xml
 # shellcheck disable=SC2016
 sed -i '/<\/Service>/i \
@@ -220,5 +233,5 @@ mv /usr/local/tomcat/conf/server.xml.tmp /usr/local/tomcat/conf/server.xml
 echo  "Test if the Key tools are fine"
 keytool -list -keystore "$KEYSTORE_PATH" -storepass "$KEY_STORE_PASSWORD"
 
-
+env
 

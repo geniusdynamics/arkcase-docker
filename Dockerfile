@@ -14,9 +14,9 @@ ENV JAVA_OPTS="-Djava.net.preferIPv4Stack=true -Duser.timezone=GMT \
   -Dacm.configurationserver.propertyfile=/root/.arkcase/acm/conf.yml \
   -Djava.security.egd=file:/dev/./urandom \
   -Djava.util.logging.config.file=/root/.arkcase/acm/log4j2.xml \
-    -Dconfiguration.client.spring.path=/root/.arkcase/acm/acm-config-server-repo/spring/auditPatterns.properties \
   -Xms1024M -Xmx1024M"
 
+#  -Dconfiguration.client.spring.path=/root/.arkcase/acm/acm-config-server-repo/spring/ \
 ENV APP_NAME="arkcase"
 ENV APP_URL="http://localhost"
 ENV APP_DOMAIN="localhost"
@@ -40,17 +40,21 @@ RUN git clone https://github.com/ArkCase/.arkcase /root/.arkcase
 # Download Config Server JAR
 RUN curl -L -o /usr/local/tomcat/config-server.jar https://github.com/ArkCase/acm-config-server/releases/download/2021.03/config-server-2021.03.jar
 # For production
-RUN curl -L -o /usr/local/tomcat/webapps/arkcase.war https://github.com/ArkCase/ArkCase/releases/download/2021.03.01/arkcase-2021.03.01.war
+# RUN curl -L -o /usr/local/tomcat/webapps/arkcase.war https://github.com/ArkCase/ArkCase/releases/download/2021.03.01/arkcase-2021.03.01.war
 
 # Copy ArkCase WAR file and configurations
 # For development
-#COPY config/arkcase-2021.03.01.war /usr/local/tomcat/webapps/arkcase.war
+COPY config/arkcase-2021.03.01.war /usr/local/tomcat/webapps/arkcase.war
 COPY config/arkcase.yaml /root/.arkcase/acm/acm-config-server-repo/arkcase.yaml
 COPY config/properties/quartz.properties /root/.arkcase/acm/acm-config-server-repo/spring/quartz.properties
 COPY config/properties/wopiPlugin.properties /root/.arkcase/acm/acm-config-server-repo/wopiPlugin.properties
 COPY config/properties/datasource.properties /root/.arkcase/acm/acm-config-server-repo/datasource.properties
 COPY config/properties/acmEmailSender.properties /root/.arkcase/acm/acm-config-server-repo/acmEmailSender.properties
 COPY config/properties/arkcase-activemq.properties /root/.arkcase/acm/acm-config-server-repo/arkcase-activemq.properties
+COPY config/conf.yml /root/.arkcase/acm/conf.yml
+COPY config/arkcase-activemq.yaml /root/.arkcase/acm/acm-config-server-repo/arkcase-activemq.yaml
+COPY config/encryption/spring-properties-encryption.xml /root/.arkcase/acm/encryption/spring-properties-encryption.xml
+
 # Modify server.xml for SSL and APR configuration
 RUN sed -i 's|<Listener className="org.apache.catalina.core.AprLifecycleListener" SSLEngine="on"/>|<Listener className="org.apache.catalina.core.AprLifecycleListener" SSLEngine="on" useAprConnector="true"/>|' /usr/local/tomcat/conf/server.xml
 
@@ -78,6 +82,7 @@ RUN sed -i 's|<Listener className="org.apache.catalina.core.AprLifecycleListener
 COPY config/converter.sh /usr/local/tomcat/converter.sh
 RUN chmod +x /usr/local/tomcat/converter.sh
 
+RUN chmod 755 /root/.arkcase/
 
 RUN chmod 755 /root/.arkcase/acm/private/*
 RUN chmod 777 /root/.arkcase/acm/private/*
