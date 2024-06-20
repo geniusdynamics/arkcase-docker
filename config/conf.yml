@@ -1,0 +1,23 @@
+application:
+  name:
+    active: arkcase,arkcase-activemq,arkcase-oidc,ldap,lookups
+    default: arkcase
+  profile: runtime
+configuration:
+  client:
+    branding.path: "branding"
+    labels.path: "labels"
+    ldap.path: "ldap"
+    lookups.path: "lookups"
+    stylesheets.path: "pdf-stylesheets"
+    rules.path: "rules"
+    spring.path: "spring"
+  server:
+    url: http://localhost:9999
+    update.path: "/config/{applicationName}"
+    remove.path: "/config/remove/{applicationName}"
+    reset.path: "/reset"
+    update.file.path: "/file"
+    modules.path: "/config/modules"
+    username: root
+    password: root
