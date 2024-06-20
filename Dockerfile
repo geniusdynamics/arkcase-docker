@@ -40,11 +40,11 @@ RUN git clone https://github.com/ArkCase/.arkcase /root/.arkcase
 # Download Config Server JAR
 RUN curl -L -o /usr/local/tomcat/config-server.jar https://github.com/ArkCase/acm-config-server/releases/download/2021.03/config-server-2021.03.jar
 # For production
-# RUN curl -L -o /usr/local/tomcat/webapps/arkcase.war https://github.com/ArkCase/ArkCase/releases/download/2021.03.01/arkcase-2021.03.01.war
+ RUN curl -L -o /usr/local/tomcat/webapps/arkcase.war https://github.com/ArkCase/ArkCase/releases/download/2021.03.01/arkcase-2021.03.01.war
 
 # Copy ArkCase WAR file and configurations
 # For development
-COPY config/arkcase-2021.03.01.war /usr/local/tomcat/webapps/arkcase.war
+#COPY config/arkcase-2021.03.01.war /usr/local/tomcat/webapps/arkcase.war
 COPY config/arkcase.yaml /root/.arkcase/acm/acm-config-server-repo/arkcase.yaml
 COPY config/properties/quartz.properties /root/.arkcase/acm/acm-config-server-repo/spring/quartz.properties
 COPY config/properties/wopiPlugin.properties /root/.arkcase/acm/acm-config-server-repo/wopiPlugin.properties
