@@ -2865,11 +2865,11 @@ acm.websockets:
   stomp_broker_relay.relay_protocol: "ssl"
   #Required values for ssl relay protocol only
   #keystore type must be JKS
-  stomp_broker_relay.keystore: "$KEYSTORE_PATH"
-  stomp_broker_relay.keystore_pass: "$KEY_STORE_PASSWORD"
-  stomp_broker_relay.truststore: "$TRUSTSTORE_PATH"
-  stomp_broker_relay.truststore_pass: "$KEY_STORE_PASSWORD"
-  stomp_broker_relay.truststore_type: "JKS"
+  stomp_broker_relay.keystore: "${KEYSTORE_PATH}"
+  stomp_broker_relay.keystore_pass: "${KEY_STORE_PASSWORD}"
+  stomp_broker_relay.truststore: "${TRUSTSTORE_PATH}"
+  stomp_broker_relay.truststore_pass: "${KEY_STORE_PASSWORD}"
+  stomp_broker_relay.truststore_type: "PKCS12"
   stomp_broker_relay.relay_host: "${APP_DOMAIN}"
   stomp_broker_relay.relay_port: 61613
   stomp_broker_relay.heartbeat_send_interval: 20000
